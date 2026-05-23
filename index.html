@@ -16,10 +16,10 @@ function onScanSuccess(decodedText) {
   try {
     const data = JSON.parse(decodedText);
 
-    // フォーム作成
+    // ✅ fetch禁止 → フォーム送信に変更
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "https://script.google.com/macros/s/AKfycbwXjbH-vpFT8K61o-cRuBpw6KnLvXrj5w_ni8sVSToKIJarY9uwQDEYPqGoyYrxDiqB/exec";
+    form.action = GAS_URL;
 
     for (const key in data) {
       const input = document.createElement("input");
@@ -36,17 +36,8 @@ function onScanSuccess(decodedText) {
     alert("QR形式が違います");
   }
 }
-
-const html5QrCode = new Html5Qrcode("reader");
-
-html5QrCode.start(
-  { facingMode: "environment" },
-  { fps: 10, qrbox: 250 },
-  onScanSuccess
-).catch(err => {
-  alert("カメラ起動失敗：" + err);
-});
 </script>
+
 
 </body>
 </html>

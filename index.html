@@ -11,8 +11,15 @@
 
 <script>
 const GAS_URL = "https://script.google.com/a/macros/iwakuni.ac.jp/s/AKfycbygOhJLWhWDprxcP0VYc8FCkbbca8S7AFNPwWsyghfTg4GA2PlOPe6Gt9NtE7okXp3D/exec";
-
+let scanned = false;  // ★追加
+  
 function onScanSuccess(decodedText) {
+
+alert(decodedText);
+
+if (scanned) return;   // ★追加（これ重要）
+  scanned = true;        // ★追加（これ重要）
+  
   try {
     const data = JSON.parse(decodedText);
 
@@ -36,7 +43,6 @@ function onScanSuccess(decodedText) {
     alert("QR形式が違います");
   }
 }
-
 
 const html5QrCode = new Html5Qrcode("reader");
 

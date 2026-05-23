@@ -36,6 +36,18 @@ function onScanSuccess(decodedText) {
     alert("QR形式が違います");
   }
 }
+
+
+const html5QrCode = new Html5Qrcode("reader");
+
+html5QrCode.start(
+  { facingMode: "environment" },
+  { fps: 10, qrbox: 250 },
+  onScanSuccess
+).catch(err => {
+  alert("カメラ起動失敗：" + err);
+});
+
 </script>
 
 

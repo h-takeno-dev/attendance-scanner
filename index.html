@@ -16,17 +16,21 @@ function onScanSuccess(decodedText) {
   try {
     const data = JSON.parse(decodedText);
 
-    fetch(GAS_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    })
-    .then(res => res.text())
-    .then(res => {
-      alert("出席登録：" + res);
-    });
+    // フォーム作成
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "https://script.google.com/macros/s/AKfycbwXjbH-vpFT8K61o-cRuBpw6KnLvXrj5w_ni8sVSToKIJarY9uwQDEYPqGoyYrxDiqB/exec";
+
+    for (const key in data) {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = data[key];
+      form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
 
   } catch (e) {
     alert("QR形式が違います");

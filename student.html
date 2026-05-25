@@ -42,6 +42,23 @@ function loadUser() {
   }).getUserInfo();
 }
 
+function readSubjectQR() {
+  const html5QrCode = new Html5QrCode("reader");
+
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (decodedText) => {
+      const subject = JSON.parse(decodedText);
+
+      localStorage.setItem("subject", JSON.stringify(subject));
+
+      alert("科目登録：" + subject.subjectName);
+
+      html5QrCode.stop();
+    }
+  );
+}
 </script>
 
 </body>

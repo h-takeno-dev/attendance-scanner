@@ -1,61 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_top">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 
-<h2>出席スキャン</h2>
-<div id="reader" style="width:300px"></div>
+<h2>出席QR生成</h2>
+
+<label>学生番号</label><br>
+<input id="studentId"><br><br>
+
+<label>氏名</label><br>
+<input id="name"><br><br>
+
+<h3>科目QRを読み取る</h3>
+<button onclick="startScan()">カメラ起動</button> <!-- ★追加 -->
+<div id="reader" style="width:300px; margin-top:10px;"></div>
+
+<br>
+<button onclick="generateQR()">QR生成</button>
+
+<h3>出席用QR</h3>
+<img id="qr">
 
 <script>
-const GAS_URL = "https://script.google.com/a/macros/iwakuni.ac.jp/s/AKfycbygOhJLWhWDprxcP0VYc8FCkbbca8S7AFNPwWsyghfTg4GA2PlOPe6Gt9NtE7okXp3D/exec";
-let scanned = false;  // ★追加
-  
-function onScanSuccess(decodedText) {
+let subjectData = null;
+let html5QrCode;
 
-alert(decodedText);
+// ✅ カメラ起動ボタン
+function startScan() {
+  html5QrCode = new Html5Qrcode("reader");
 
-if (scanned) return;   // ★追加（これ重要）
-  scanned = true;        // ★追加（これ重要）
-  
-  try {
-    const data = JSON.parse(decodedText);
+  html5QrCode.start(
+    { facingMode: "environment" }, // ★変更
+    { fps: 10, qrbox: 250 },
+    (decodedText) => {
+      try {
+        subjectData = JSON.parse(decodedText);
+        alert("科目読み取り完了：" + subjectData.subjectName);
 
-    // ✅ fetch禁止 → フォーム送信に変更
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = GAS_URL;
+        html5QrCode.stop();
 
-    for (const key in data) {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = data[key];
-      form.appendChild(input);
+      } catch (e) {
+        alert("科目QRではありません");
+      }
     }
-
-    document.body.appendChild(form);
-    form.submit();
-
-  } catch (e) {
-    alert("QR形式が違います");
-  }
+  ).catch(err => {
+    console.log(err); // ★追加（デバッグ用）
+    alert("カメラ起動失敗：" + err);
+  });
 }
 
-const html5QrCode = new Html5Qrcode("reader");
+// ✅ QR生成
+function generateQR() {
+  const studentId = document.getElementById("studentId").value;
+  const name = document.getElementById("name").value;
 
-html5QrCode.start(
-  { facingMode: "environment" },
-  { fps: 10, qrbox: 250 },
-  onScanSuccess
-).catch(err => {
-  alert("カメラ起動失敗：" + err);
-});
+  if (!subjectData) {
+    alert("先に科目QRを読み取ってください");
+    return;
+  }
 
+  const data = {
+    studentId: studentId,
+    name: name,
+    subjectId: subjectData.subjectId,
+    subjectName: subjectData.subjectName,
+    time: new Date().toISOString()
+  };
+
+  const qrUrl =
+    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
+    encodeURIComponent(JSON.stringify(data));
+
+  document.getElementById("qr").src = qrUrl;
+}
 </script>
-
 
 </body>
 </html>

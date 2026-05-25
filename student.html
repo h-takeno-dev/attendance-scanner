@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ 正しくJS読み込む -->
+  <!-- ✅ これが最重要（絶対このまま） -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
 </head>
 <body>
 
@@ -16,14 +18,11 @@
 <label>氏名</label><br>
 <input id="name"><br><br>
 
-<!-- ✅ 科目QR読み取り -->
 <h3>科目QRを読み取る</h3>
 <button onclick="startScan()">カメラ起動</button>
 <div id="reader" style="width:300px; margin-top:10px;"></div>
 
 <br>
-
-<!-- ✅ QR生成 -->
 <button onclick="generateQR()">QR生成</button>
 
 <h3>出席用QR</h3>
@@ -31,10 +30,12 @@
 
 <script>
 
+// ✅ 読み込み確認（デバッグ）
+console.log("Html5QrCode =", typeof Html5QrCode);
+
 let subjectData = null;
 let html5QrCode;
 
-// ✅ 科目QR読み取り
 function startScan() {
 
   html5QrCode = new Html5QrCode("reader");
@@ -45,11 +46,8 @@ function startScan() {
     (decodedText) => {
       try {
         subjectData = JSON.parse(decodedText);
-
         alert("科目取得：" + subjectData.subjectName);
-
         html5QrCode.stop();
-
       } catch (e) {
         alert("科目QRではありません");
       }
@@ -66,11 +64,6 @@ function generateQR() {
 
   if (!subjectData) {
     alert("先に科目QRを読み取ってください");
-    return;
-  }
-
-  if (!studentId || !name) {
-    alert("学生番号と氏名を入力してください");
     return;
   }
 

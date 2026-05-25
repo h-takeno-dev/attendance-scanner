@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ これが最重要（絶対このまま） -->
+  <!-- ✅ ここが最重要（これ1行だけ） -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 </head>
+
 <body>
 
 <h2>出席QR生成</h2>
@@ -20,6 +21,7 @@
 
 <h3>科目QRを読み取る</h3>
 <button onclick="startScan()">カメラ起動</button>
+
 <div id="reader" style="width:300px; margin-top:10px;"></div>
 
 <br>
@@ -30,7 +32,7 @@
 
 <script>
 
-// ✅ 読み込み確認（デバッグ）
+// ✅ 読み込み確認（ここ重要）
 console.log("Html5QrCode =", typeof Html5QrCode);
 
 let subjectData = null;
@@ -43,7 +45,7 @@ function startScan() {
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
-    (decodedText) => {
+    function(decodedText) {
       try {
         subjectData = JSON.parse(decodedText);
         alert("科目取得：" + subjectData.subjectName);
@@ -52,7 +54,7 @@ function startScan() {
         alert("科目QRではありません");
       }
     }
-  ).catch(err => {
+  ).catch(function(err) {
     alert("カメラ起動失敗：" + err);
   });
 }

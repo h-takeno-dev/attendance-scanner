@@ -1,64 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-  https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ✅ 正しくJS読み込む -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 
-<h2>出席QR</h2>
+<h2>出席QR生成</h2>
 
-<button onclick="loadUser()">QR表示</button>
+<label>学生番号</label><br>
+<input id="studentId"><br><br>
 
-<br><br>
+<label>氏名</label><br>
+<input id="name"><br><br>
+
+<!-- ✅ 科目QR読み取り -->
+<h3>科目QRを読み取る</h3>
+<button onclick="startScan()">カメラ起動</button>
+<div id="reader" style="width:300px; margin-top:10px;"></div>
+
+<br>
+
+<!-- ✅ QR生成 -->
+<button onclick="generateQR()">QR生成</button>
+
+<h3>出席用QR</h3>
 <img id="qr">
 
 <script>
 
-let subjectData = JSON.parse(localStorage.getItem("subject"));
+let subjectData = null;
+let html5QrCode;
 
-function loadUser() {
+// ✅ 科目QR読み取り
+function startScan() {
 
-  google.script.run.withSuccessHandler(function(user) {
-
-    if (!subjectData) {
-      alert("先に科目QRを読み取ってください");
-      return;
-    }
-
-    const data = {
-      studentId: user.studentId,
-      name: user.name,
-      subjectId: subjectData.subjectId,
-      subjectName: subjectData.subjectName,
-      time: new Date().toISOString()
-    };
-
-    const qrUrl =
-      "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
-      encodeURIComponent(JSON.stringify(data));
-
-    document.getElementById("qr").src = qrUrl;
-
-  }).getUserInfo();
-}
-
-function readSubjectQR() {
-  const html5QrCode = new Html5QrCode("reader");
+  html5QrCode = new Html5QrCode("reader");
 
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
     (decodedText) => {
-      const subject = JSON.parse(decodedText);
+      try {
+        subjectData = JSON.parse(decodedText);
 
-      localStorage.setItem("subject", JSON.stringify(subject));
+        alert("科目取得：" + subjectData.subjectName);
 
-      alert("科目登録：" + subject.subjectName);
+        html5QrCode.stop();
 
-      html5QrCode.stop();
+      } catch (e) {
+        alert("科目QRではありません");
+      }
     }
-  );
+  ).catch(err => {
+    alert("カメラ起動失敗：" + err);
+  });
 }
+
+function generateQR() {
+
+  const studentId = document.getElementById("studentId").value;
+  const name = document.getElementById("name").value;
+
+  if (!subjectData) {
+    alert("先に科目QRを読み取ってください");
+    return;
+  }
+
+  if (!studentId || !name) {
+    alert("学生番号と氏名を入力してください");
+    return;
+  }
+
+  const data = {
+    studentId: studentId,
+    name: name,
+    subjectId: subjectData.subjectId,
+    subjectName: subjectData.subjectName,
+    time: new Date().toISOString()
+  };
+
+  const qrUrl =
+    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
+    encodeURIComponent(JSON.stringify(data));
+
+  document.getElementById("qr").src = qrUrl;
+}
+
 </script>
 
 </body>
